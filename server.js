@@ -19,12 +19,15 @@ app.get("/uuid", (req, res) => {
 })
 //socket connection
 io.on('connection', socket => {
+    //joining the room in socket 
     socket.on('join-room', roomId => {
         room = io.sockets.adapter.rooms.get(roomId);
         var roomSize = 0;
+        //setting the roomSize
         if (room) {
             roomSize = room.size;
         }
+        //if roomSize is less than 2 join user to to the room
         if (roomSize < 2) {
             socket.join(roomId);
             socket.broadcast.to(roomId).emit('user-connected');
@@ -37,7 +40,9 @@ io.on('connection', socket => {
             socket.on('clicked', (id) => {
                 socket.broadcast.to(roomId).emit('clicked', id);
             })
-        } else {
+        }
+        //if roomsize is greateer that two emit that room is full
+         else {
             socket.emit('full-room');
         }
     })
@@ -48,7 +53,7 @@ app.get("/:room", (req, res) => {
         roomId: req.params.room
     });
 })
-//ngrok
+//connecting the ngrok 
 server.listen(port, () => console.log(`Server running on port ${port}`));
 (async function(){
     const url = await ngrok.connect({

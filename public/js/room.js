@@ -17,6 +17,7 @@ const copyToClip = () => {
 }
 //emit joining the room in to join room in socket
 socket.emit("join-room", ROOM_ID);
+//on user connected connected the one who created the board gets 'x' and other player gets 'o' and add event can play so the other user can click
 socket.on("user-connected", () => {
     document.getElementById("message").innerHTML = "User connected";
     myClick = "X";
@@ -24,14 +25,18 @@ socket.on("user-connected", () => {
     enableClick = true;
     socket.emit("can-play");
 })
-//on play the one who created the board gets the 'x' and other player gets 'o'
+//on event passed can play the other user gets to play sets the user letter to 'o' and the player who creted the board sets his letter'x'
 socket.on("can-play", () => {
     myClick = "O";
     OtherClick = "X";
     enableClick = true;
 })
+//clicked function is passed when user clicks the box
 //click function if user has enable click he got 1 move once its clicked enable click becomes false
-//and adding game logic to the user
+//if the user had value enableclick to true he gets one incrementing the user moves and changing the bos element to letter allorted
+//setting the enable click to false once clicked
+//adding event clicked so that other user get changes on his browser
+//passing the id from the element 
 const clicked = (id) => {
     if (enableClick) {
         moves+=1;
@@ -41,6 +46,10 @@ const clicked = (id) => {
         socket.emit("clicked", id);
         enableClick = false;
         gameStatus[id-1] = 1;
+                //example:user1 clicks the first box then gamstatus[1-1]=1;
+        //the gamestatus becomes ['1','0','0','0','0','0','0','0','0']
+        //let user clicked  the first three row
+        //then gamestatus becomes = gamestatus[1,1,1,2,2,1,2,1,1 ] then u win message appends else there is nine moves and no match to the below logic then draw message append
         if ((gameStatus[0] == 1 && gameStatus[1] == 1 && gameStatus[2] == 1)||
         (gameStatus[0] ==1 && gameStatus[3] == 1 && gameStatus[6] == 1)||
         (gameStatus[0] ==1 && gameStatus[4] == 1 && gameStatus[8] == 1)||
@@ -58,7 +67,8 @@ const clicked = (id) => {
         }
     }
 }
-//adding game logic to other user
+//socket event on the clicked change to the box element to letter of other user after his click
+//
 socket.on("clicked", (id) => {
     moves+=1;
     const element = document.getElementById(id);
@@ -66,6 +76,8 @@ socket.on("clicked", (id) => {
     element.onclick = null;
     enableClick = true;
     gameStatus[id-1] = 2;
+    //same logic as seen in clicked function here it calculates the other user user point if other user clicked first three boxes
+    //gamestatus becomes gamestaus[2,2,2,1,1,2,1,2,2] whichb is true in below argument message elements appends "you loose" else then its draw
     if ((gameStatus[0] ==2 && gameStatus[1] ==2 && gameStatus[2] ==2)||
         (gameStatus[0] ==2 && gameStatus[3] ==2 && gameStatus[6] ==2)||
         (gameStatus[0] ==2 && gameStatus[4] ==2 && gameStatus[8] ==2)||
@@ -82,7 +94,7 @@ socket.on("clicked", (id) => {
             setTimeout(()=>{location.href='/';}, 2000);
         }
 })
-//on full room show message room is full
+//if room size greater than two server emits full-room .. display room is full on message
 socket.on("full-room", () => {
     document.getElementById("message").innerHTML = "Room full...";
     setTimeout(()=>{location.href='/';}, 2000);
