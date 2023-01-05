@@ -4,6 +4,7 @@ var myClick;
 var OtherClick;
 const socket = io("/");
 var enableClick = false;
+//getting the location value
 document.getElementById("url").value=location
 const copyToClip = () => {
     copyText = document.getElementById("url")
@@ -14,6 +15,7 @@ const copyToClip = () => {
     copyText.onclick = null;
     window.getSelection().removeAllRanges();
 }
+//emit joining the room in to join room in socket
 socket.emit("join-room", ROOM_ID);
 socket.on("user-connected", () => {
     document.getElementById("message").innerHTML = "User connected";
@@ -22,11 +24,14 @@ socket.on("user-connected", () => {
     enableClick = true;
     socket.emit("can-play");
 })
+//on play the one who created the board gets the 'x' and other player gets 'o'
 socket.on("can-play", () => {
     myClick = "O";
     OtherClick = "X";
     enableClick = true;
 })
+//click function if user has enable click he got 1 move once its clicked enable click becomes false
+//and adding game logic to the user
 const clicked = (id) => {
     if (enableClick) {
         moves+=1;
@@ -53,6 +58,7 @@ const clicked = (id) => {
         }
     }
 }
+//adding game logic to other user
 socket.on("clicked", (id) => {
     moves+=1;
     const element = document.getElementById(id);
@@ -76,12 +82,12 @@ socket.on("clicked", (id) => {
             setTimeout(()=>{location.href='/';}, 2000);
         }
 })
-
+//on full room show message room is full
 socket.on("full-room", () => {
     document.getElementById("message").innerHTML = "Room full...";
     setTimeout(()=>{location.href='/';}, 2000);
 })
-
+//on disconnecting show message user disconnected
 socket.on("user-disconnected", () => {
     document.getElementById("message").innerHTML = "User disconnected";
     setTimeout(()=>{location.href='/';}, 2000);
